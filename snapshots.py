@@ -17,10 +17,11 @@ import shutil
 from datetime import datetime
 
 # variables
-AWSJsonURL = "https://s3.amazonaws.com/Minecraft.Download/versions/versions.json"
+AWSJsonURL = "https://s3.amazonaws.com/Minecraft.Download/versions/versions.json" # Url to the 'version.json' official file
 AWSJsonFileRequest = urllib.request.urlopen(AWSJsonURL)
 AWSJsonFile = AWSJsonFileRequest.read()
-versionsFile = os.getcwd() + "/versions.json"
+versionsFile = os.getcwd() + "/versions.json" # Path to the 'versions.json' local file
+JarPath = os.getcwd() # Path to where you want to put downloaded jar files
 
 # functions
 def DownloadJsonFile():
@@ -34,22 +35,20 @@ def DownloadJar(versionId):
 	'''
 	Download the minecraft_server.jar of the version specified in parameter
 	'''
-	print ("[%s] Downloading the latest version... \n" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+	print ("[{0}] Downloading the latest version... \n".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 	AWSJarURL = "https://s3.amazonaws.com/Minecraft.Download/versions/{0}/minecraft_server.{0}.jar".format(versionId)
-	jarFile = "{0}/minecraft_server.{1}.jar".format(os.getcwd(), versionId)
+	jarFile = "{0}/minecraft_server.{1}.jar".format(JarPath, versionId)
 	with urllib.request.urlopen(AWSJarURL) as response, open(jarFile, 'wb') as out_file:
 		shutil.copyfileobj(response, out_file)
-	print ("Version {0} download as minecraft_server.{0}.jar \n".format(versionId))
+	print ("[{1}] Version {0} download as minecraft_server.{0}.jar \n".format(versionId, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
 # Script
-# Is versions.json here ?
-if not os.path.exists(versionsFile):
+if not os.path.exists(versionsFile): # Is versions.json here ?
 	print ("No versions.json, downloading it... \n")
-	# If not, then download it from AWS and write it to versions.json
-	DownloadJsonFile()
+	DownloadJsonFile() # If not, then download it from AWS and write it to versions.json
 	print ("Downloaded ! \n")
 
-print ("[%s] Checking for updates... \n" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+print ("[{0}] Checking for updates... \n".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 # Compare the two versions of versions.Json
 with open(versionsFile, 'r') as localFile:
 	localJson = json.load(localFile)
@@ -63,8 +62,10 @@ if latestLocalVersion != latestRemoteVersion:
 	# Needs to update the file
 	DownloadJsonFile()
 	print ("versions.json updated ! \n")
-
-	# Now download the latest .jar file
-	DownloadJar(latestRemoteVersion)
+	DownloadJar(latestRemoteVersion) # Now download the latest .jar file
 else:
-	print ("No need to update ! Yay !")
+	if os.path.exists("{0}/minecraft_server.{1}.jar".format(JarPath, latestLocalVersion)): # Is latest server.jar here ?
+		print ("No need to update ! Yay !")
+	else:
+		print("minecraft_server.{0}.jar not found.".format(latestLocalVersion))
+		DownloadJar(latestLocalVersion) # Download the latest .jar file
