@@ -14,6 +14,7 @@ import os
 import urllib.request
 import json
 import shutil
+from datetime import datetime
 
 # variables
 AWSJsonURL = "https://s3.amazonaws.com/Minecraft.Download/versions/versions.json"
@@ -33,7 +34,7 @@ def DownloadJar(versionId):
 	'''
 	Download the minecraft_server.jar of the version specified in parameter
 	'''
-	print ("Downloading the latest version... \n")
+	print ("[%s] Downloading the latest version... \n" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 	AWSJarURL = "https://s3.amazonaws.com/Minecraft.Download/versions/{0}/minecraft_server.{0}.jar".format(versionId)
 	jarFile = "{0}/minecraft_server.{1}.jar".format(os.getcwd(), versionId)
 	with urllib.request.urlopen(AWSJarURL) as response, open(jarFile, 'wb') as out_file:
@@ -48,7 +49,7 @@ if not os.path.exists(versionsFile):
 	DownloadJsonFile()
 	print ("Downloaded ! \n")
 
-print ("Checking for updates... \n")
+print ("[%s] Checking for updates... \n" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 # Compare the two versions of versions.Json
 with open(versionsFile, 'r') as localFile:
 	localJson = json.load(localFile)
